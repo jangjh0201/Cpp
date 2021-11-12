@@ -17,7 +17,10 @@ public:
 	string str;
 
 	void fight(Unit& unit) {
-		if (this->attackable == false) { cout << this->name << " can not attack" << endl; }
+		if (this->attackable == false) { 
+			cout << this->name << " can not attack" << endl;
+			cout << unit.name << "'s hp: " << unit.hp << endl;
+		}
 		else {
 			cout << this->str << endl;
 			unit.getAttacked(*this);
@@ -30,8 +33,6 @@ public:
 
 			//공격 받았던 유닛이 생존한 경우, 공격한 유닛에게 반격함.
 			if (unit.alive) this->getAttacked(unit);
-
-			cout << endl;
 		}
 	}
 
@@ -60,7 +61,6 @@ class mediumUnit : public Unit { public: mediumUnit() { slotSize = 2; } };
 class largeUnit : public Unit { public: largeUnit() { slotSize = 4; } };
 
 class Marine : public smallUnit {
-
 public:
 	Marine() {
 		name = "marine";
@@ -205,6 +205,10 @@ public:
 };
 
 class Dropship : public largeUnit {
+private:
+	int slot = 8;
+	int unitCount = 0;
+	Unit* unitArr = new Unit[8];
 public:
 	Dropship() {
 		name = "dropship";
@@ -213,10 +217,6 @@ public:
 		hp = 150;
 		armour = 1;
 		attackable = false;
-
-		int slot = 8;
-		int unitCount = 0;
-		Unit* unitArr = new Unit[8];
 	}
 
 	~Dropship() {
@@ -244,7 +244,22 @@ public:
 	};
 
 	void load(Unit& unit) {
+		if (this->slot - unit.slotSize < 0) {
+			cout << "not enough empty slot" << endl << endl;
+		}
+		else {
+			for (int i = unitCount; i < i + 1; i++) {
+				unitArr[i] = unit;
+				unit.attackable = false;
+				cout << "dropship load " << unitArr[i].name << endl;
 
+				this->slot -= unit.slotSize;
+				this->unitCount++;
+
+				printStatus();
+				break;
+			}
+		}
 	};
 
 	void drop() {
@@ -252,11 +267,16 @@ public:
 	};
 
 	void printStatus() {
-
+		int i = 0;
+		cout << "empty: " << slot << endl;
+		cout << "---------dropship---------" << endl;
+		while (i <= this->unitCount) {
+			cout << unitArr[i].name << " ";
+			i++;
+		}
+		cout << endl << "---------dropship---------" << endl;
 	};
 };
-
-
 
 int main() {
 	Marine marine;
@@ -269,22 +289,20 @@ int main() {
 	int gas = 1000;
 
 	marine.buy(mineral, gas);
-
-	//cout << mineral << endl;
-
 	tank.buy(mineral, gas);
 	zealot.buy(mineral, gas);
 	dragoon.buy(mineral, gas);
 	dropship.buy(mineral, gas);
 	cout << "------------------------------" << endl;
 
-	marine.fight(zealot);
-	marine.fight(zealot);
-	zealot.fight(marine);
+	dropship.load(zealot);
+	dropship.load(marine);
+	dropship.load(tank);
+	dropship.load(dragoon);
+
+	zealot.fight(dragoon);
+	marine.fight(dragoon);
 	tank.fight(dragoon);
 
-	dropship.fight(marine);
-
 	return 0;
-
 }
