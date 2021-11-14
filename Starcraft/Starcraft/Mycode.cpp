@@ -4,44 +4,17 @@
 using namespace std;
 
 class Unit {
-public:
-	string name;
-	int mineral;
-	int gas;
-	int hp;      //유닛의 체력
-	int damage, armour;   //유닛의 공격력, 방어력
-	int slotSize;
-	bool alive = true;
-	bool attackable;
+protected:
+	string name, verse;
+	int mineral, gas, hp, damage, armour, slotSize;
+	bool attackable, alive = true;
 
-	string str;
-	
-	void fight(Unit& unit) {
-		if (this->attackable == false) { 
-			cout << this->name << " can not attack" << endl;
-			cout << unit.name << "'s hp: " << unit.hp << endl;
-		}
-		else {
-			cout << this->str << endl;
-			unit.getAttacked(*this);
-
-			//공격 받았던 유닛이 생존한 경우, 공격한 유닛에게 반격함.
-			if (unit.alive) {
-				cout << unit.str << endl;
-				this->getAttacked(unit);
-			}
-		}
-	}
-	
-	void attack() {
-	}
-
-	//getAttacked() 함수를 호출한 유닛이 공격받음.
+private:
 	void getAttacked(Unit& unit) {
-		int real_damage = unit.damage - this->armour;
+		int realDamage = unit.damage - this->armour;
 		//공격력보다 방어력이 높은 경우 데미지 = 0
-		if (real_damage <= 0) real_damage = 0;
-		this->hp -= real_damage;
+		if (realDamage <= 0) realDamage = 0;
+		this->hp -= realDamage;
 
 		//공격을 받아 체력이 0이 되면 공격을 할 수 없도록 함.
 		if (this->hp > 0) {
@@ -53,6 +26,55 @@ public:
 			cout << this->name << " not alive" << endl;
 		}
 	}
+
+public:
+	Unit() {
+		string name, verse;
+		int mineral, gas, hp, damage, armour, slotSize;
+		bool attackable, alive = true;
+	}
+	
+	~Unit() {
+
+	}
+
+	void Fight(Unit& unit) {
+		if (this->attackable == false) {
+			cout << this->name << " can not attack" << endl;
+		}
+		else {
+			cout << this->verse << endl;
+			unit.getAttacked(*this);
+
+			//공격 받았던 유닛이 생존한 경우, 공격한 유닛에게 반격함.
+			if (unit.alive) {
+				cout << unit.verse << endl;
+				this->getAttacked(unit);
+			}
+		}
+	}
+
+	string GetName() { return this->name; }
+	string GetVerse() { return this->verse; }
+	int GetMIneral() { return this->mineral; }
+	int GetGas() { return this->gas; }
+	int GetHp() { return this->hp; }
+	int GetDamage() { return this->damage; }
+	int GetArmour() { return this->armour; }
+	int GetSlotSize() { return this->slotSize; }
+	bool GetAttackable() { return this->attackable; }
+	bool GetAlive() { return this->alive; }
+
+	void SetName(const string name) { this->name = name; }
+	void SetVerse(const string verse) { this->verse = verse; }
+	void SetMIneral(int mineral) { this->mineral = mineral; }
+	void SetGas(int gas) { this->gas = gas; }
+	void SetHp(int hp) { this->hp = hp; }
+	void SetDamage(int damage) { this->damage = damage; }
+	void SetArmour(int armour) { this->armour = armour; }
+	void SetSlotSize(int slotSize) { this->slotSize = slotSize; }
+	void SetAttackable(bool attackable) { this->attackable = attackable; }
+	void SetAlive(bool alive) { this->alive = alive; }
 };
 
 class smallUnit : public Unit { public: smallUnit() { slotSize = 1; } };
@@ -63,17 +85,16 @@ class Marine : public smallUnit {
 public:
 	Marine() {
 		name = "marine";
+		verse = "Go! Go! Go!";
 		mineral = 50;
 		gas = 0;
 		hp = 40;
 		damage = 6;
 		armour = 0;
 		attackable = true;
-
-		str = "Go! Go! Go!";
 	}
 
-	void buy(int& mineral, int& gas) {
+	void Buy(int& mineral, int& gas) {
 		int flag = 0; // 유닛을 생성 가능한지 판별. flag 값이 2일 때만 생성 가능.
 		if (mineral >= this->mineral) {
 			mineral -= this->mineral;
@@ -94,24 +115,20 @@ public:
 	};
 };
 
-
-
 class Tank : public largeUnit {
 public:
 	Tank() {
 		name = "tank";
+		verse = "Move it!";
 		mineral = 150;
 		gas = 50;
 		hp = 150;
-
 		damage = 30;
 		armour = 1;
 		attackable = true;
-
-		str = "Move it!";
 	}
 
-	void buy(int& mineral, int& gas) {
+	void Buy(int& mineral, int& gas) {
 		int flag = 0;
 
 		if (mineral >= this->mineral) {
@@ -137,17 +154,16 @@ class Zealot : public mediumUnit {
 public:
 	Zealot() {
 		name = "zealot";
+		verse = "For Adun!";
 		mineral = 100;
 		gas = 0;
 		hp = 160;
 		damage = 16;
 		armour = 1;
 		attackable = true;
-
-		str = "For Adun!";
 	}
 
-	void buy(int& mineral, int& gas) {
+	void Buy(int& mineral, int& gas) {
 		int flag = 0;
 		if (mineral >= this->mineral) {
 			mineral -= this->mineral;
@@ -172,17 +188,16 @@ class Dragoon : public largeUnit {
 public:
 	Dragoon() {
 		name = "dragoon";
+		verse = "Confirmed.";
 		mineral = 125;
 		gas = 50;
 		hp = 180;
 		damage = 20;
 		armour = 1;
 		attackable = true;
-
-		str = "Confirmed.";
 	}
 
-	void buy(int& mineral, int& gas) {
+	void Buy(int& mineral, int& gas) {
 		int flag = 0;
 		if (mineral >= this->mineral) {
 			mineral -= this->mineral;
@@ -207,8 +222,7 @@ class Dropship : public largeUnit {
 private:
 	int slot = 8;
 	int unitCount = 0;
-	Unit* unitArr [8];
-
+	Unit unitArr[8];
 public:
 	Dropship() {
 		name = "dropship";
@@ -218,12 +232,8 @@ public:
 		armour = 1;
 		attackable = false;
 	}
-	
-	~Dropship() {
 
-	};
-
-	void buy(int& mineral, int& gas) {
+	void Buy(int& mineral, int& gas) {
 		int flag = 0;
 		if (mineral >= this->mineral) {
 			mineral -= this->mineral;
@@ -242,43 +252,37 @@ public:
 		if (flag == 2)
 			cout << "Can I take your order?" << endl;
 	};
-
-	void load(Unit unit) {
-		if (this->slot - unit.slotSize < 0) {
+	
+	void Load(Unit& unit) {
+		if (this->slot - unit.GetSlotSize() < 0) {
 			cout << "not enough empty slot" << endl << endl;
 		}
 		else {
 			for (int i = unitCount; i < unitCount + 1; i++) {
-				unitArr[i] = &unit;
-				unitArr[i]->attackable = false;
-				cout << "dropship load " << unitArr[i]->name << endl;
+				unitArr[i] = unit;
+				unit.SetAttackable(false);
+				cout << "dropship load " << unitArr[i].GetName() << endl;
 			}
-			this->slot -= unit.slotSize;
+			this->slot -= unit.GetSlotSize();
 			this->unitCount++;
 
 			printStatus();
 		}
 	};
 
-	void drop() {
-		int i = 0;
-		while (i < this->unitCount) {
-			cout << unitArr[i]->name << " drop" << endl;
-			unitArr[i]->attackable = true;
-			i++;
-		}
+	void Drop() {
 	};
-
+private:
 	void printStatus() {
 		int i = 0;
 		cout << "empty: " << slot << endl;
 		cout << "---------dropship---------" << endl;
 		while (i <= this->unitCount) {
-			cout << unitArr[i]->name << " ";
+			cout << unitArr[i].GetName() << " ";
 			i++;
 		}
 		cout << endl << "---------dropship---------" << endl;
-	}
+	};
 };
 
 int main() {
@@ -291,27 +295,27 @@ int main() {
 	int mineral = 1000;
 	int gas = 1000;
 
-	marine.buy(mineral, gas);
-	tank.buy(mineral, gas);
-	zealot.buy(mineral, gas);
-	dragoon.buy(mineral, gas);
-	dropship.buy(mineral, gas);
+	marine.Buy(mineral, gas);
+	tank.Buy(mineral, gas);
+	zealot.Buy(mineral, gas);
+	dragoon.Buy(mineral, gas);
+	dropship.Buy(mineral, gas);
 	cout << "------------------------------" << endl;
 
-	dropship.load(zealot);
-	dropship.load(marine);
-	dropship.load(tank);
-	dropship.load(dragoon);
+	dropship.Load(zealot);
+	dropship.Load(marine);
+	dropship.Load(tank);
+	dropship.Load(dragoon);
 
-	zealot.fight(dragoon);
-	marine.fight(dragoon);
-	tank.fight(dragoon);
+	zealot.Fight(dragoon);
+	marine.Fight(dragoon);
+	tank.Fight(dragoon);
 
-	dropship.drop();
+	dropship.Drop();
 
-	zealot.fight(dragoon);
-	marine.fight(dragoon);
-	tank.fight(dragoon);
-
+	zealot.Fight(dragoon);
+	marine.Fight(dragoon);
+	tank.Fight(dragoon);
+	
 	return 0;
 }
