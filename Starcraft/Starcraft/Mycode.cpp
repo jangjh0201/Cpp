@@ -11,6 +11,7 @@ protected:
 
 private:
 	void getAttacked(Unit& unit) {
+		cout << unit.verse << endl;
 		int realDamage = unit.damage - this->armour;
 		//공격력보다 방어력이 높은 경우 데미지 = 0
 		if (realDamage <= 0) realDamage = 0;
@@ -29,13 +30,9 @@ private:
 
 public:
 	Unit() {
-		string name, verse;
-		int mineral, gas, hp, damage, armour, slotSize;
-		bool attackable, alive = true;
 	}
 	
 	~Unit() {
-
 	}
 
 	void Fight(Unit& unit) {
@@ -43,12 +40,10 @@ public:
 			cout << this->name << " can not attack" << endl;
 		}
 		else {
-			cout << this->verse << endl;
 			unit.getAttacked(*this);
 
 			//공격 받았던 유닛이 생존한 경우, 공격한 유닛에게 반격함.
-			if (unit.alive) {
-				cout << unit.verse << endl;
+			if (unit.alive && unit.attackable) {
 				this->getAttacked(unit);
 			}
 		}
@@ -222,7 +217,15 @@ class Dropship : public largeUnit {
 private:
 	int slot = 8;
 	int unitCount = 0;
-	Unit unitArr[8];
+	Unit** unitArr = new Unit*[8];
+
+	/*
+	1. Unit unitArr[8] : Unit 객체를 받을 수 있는 8칸 Array 선언. 그러나 Call by value라 외부 객체 참조 불가. 동적 할당 불가.
+	2. Unit* unitArr[8] : Unit 객체를 받을 수 있는 8칸 *Array 선언. 외부 객체 참조 가능. 그러나 동적 할당 불가.
+	3. Unit* unitArr = new Unit[8] : Unit 객체를 받을 수 있는 8칸 동적 Array 선언. 그러나 Call by value라 외부 객체 참조 불가.
+	4. Unit** unitArr = new Unit*[8] : *Unit 객체를 받을 수 있는 8칸 동적 **Array 선언.
+	*/
+
 public:
 	Dropship() {
 		name = "dropship";
@@ -258,19 +261,24 @@ public:
 			cout << "not enough empty slot" << endl << endl;
 		}
 		else {
-			for (int i = unitCount; i < unitCount + 1; i++) {
-				unitArr[i] = unit;
-				unit.SetAttackable(false);
-				cout << "dropship load " << unitArr[i].GetName() << endl;
-			}
-			this->slot -= unit.GetSlotSize();
-			this->unitCount++;
+			unitArr[unitCount] = &unit;
+			unitArr[unitCount]->SetAttackable(false);
+			cout << "dropship load " << unitArr[unitCount]->GetName() << endl;
 
 			printStatus();
+			this->slot -= unit.GetSlotSize();
+			this->unitCount++;
 		}
 	};
 
 	void Drop() {
+		int i = 0;
+		while (i < this->unitCount) {
+			cout << unitArr[i]->GetName() << " drop" << endl;
+			unitArr[i]->SetAttackable(true);
+			i++;
+		}
+		delete unitArr;
 	};
 private:
 	void printStatus() {
@@ -278,7 +286,7 @@ private:
 		cout << "empty: " << slot << endl;
 		cout << "---------dropship---------" << endl;
 		while (i <= this->unitCount) {
-			cout << unitArr[i].GetName() << " ";
+			cout << unitArr[i]->GetName() << " ";
 			i++;
 		}
 		cout << endl << "---------dropship---------" << endl;
@@ -316,6 +324,7 @@ int main() {
 	zealot.Fight(dragoon);
 	marine.Fight(dragoon);
 	tank.Fight(dragoon);
-	
+	dropship.Fight(dragoon);
+
 	return 0;
 }

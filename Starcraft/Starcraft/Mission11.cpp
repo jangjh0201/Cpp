@@ -19,25 +19,20 @@ public:
 	void fight(Unit& unit) {
 		if (this->attackable == false) { 
 			cout << this->name << " can not attack" << endl;
-			cout << unit.name << "'s hp: " << unit.hp << endl;
 		}
 		else {
-			cout << this->str << endl;
 			unit.getAttacked(*this);
 
 			//공격 받았던 유닛이 생존한 경우, 공격한 유닛에게 반격함.
-			if (unit.alive) {
-				cout << unit.str << endl;
+			if (unit.alive && unit.attackable) {
 				this->getAttacked(unit);
 			}
 		}
 	}
-	
-	void attack() {
-	}
 
 	//getAttacked() 함수를 호출한 유닛이 공격받음.
 	void getAttacked(Unit& unit) {
+		cout << unit.str << endl;
 		int real_damage = unit.damage - this->armour;
 		//공격력보다 방어력이 높은 경우 데미지 = 0
 		if (real_damage <= 0) real_damage = 0;
@@ -69,7 +64,6 @@ public:
 		damage = 6;
 		armour = 0;
 		attackable = true;
-
 		str = "Go! Go! Go!";
 	}
 
@@ -94,8 +88,6 @@ public:
 	};
 };
 
-
-
 class Tank : public largeUnit {
 public:
 	Tank() {
@@ -103,11 +95,9 @@ public:
 		mineral = 150;
 		gas = 50;
 		hp = 150;
-
 		damage = 30;
 		armour = 1;
 		attackable = true;
-
 		str = "Move it!";
 	}
 
@@ -143,7 +133,6 @@ public:
 		damage = 16;
 		armour = 1;
 		attackable = true;
-
 		str = "For Adun!";
 	}
 
@@ -178,7 +167,6 @@ public:
 		damage = 20;
 		armour = 1;
 		attackable = true;
-
 		str = "Confirmed.";
 	}
 
@@ -207,7 +195,14 @@ class Dropship : public largeUnit {
 private:
 	int slot = 8;
 	int unitCount = 0;
-	Unit* unitArr [8];
+	Unit** unitArr = new Unit*[8];
+
+	/*
+	1. Unit unitArr[8] : Unit 객체를 받을 수 있는 8칸 Array 선언. 그러나 Call by value라 외부 객체 참조 불가. 동적 할당 불가.
+	2. Unit* unitArr[8] : Unit 객체를 받을 수 있는 8칸 *Array 선언. 외부 객체 참조 가능. 그러나 동적 할당 불가.
+	3. Unit* unitArr = new Unit[8] : Unit 객체를 받을 수 있는 8칸 동적 Array 선언. 그러나 Call by value라 외부 객체 참조 불가.
+	4. Unit** unitArr = new Unit*[8] : *Unit 객체를 받을 수 있는 8칸 동적 **Array 선언. 
+	*/
 
 public:
 	Dropship() {
@@ -243,20 +238,18 @@ public:
 			cout << "Can I take your order?" << endl;
 	};
 
-	void load(Unit unit) {
+	void load(Unit& unit) {
 		if (this->slot - unit.slotSize < 0) {
 			cout << "not enough empty slot" << endl << endl;
 		}
 		else {
-			for (int i = unitCount; i < unitCount + 1; i++) {
-				unitArr[i] = &unit;
-				unitArr[i]->attackable = false;
-				cout << "dropship load " << unitArr[i]->name << endl;
-			}
-			this->slot -= unit.slotSize;
-			this->unitCount++;
+			unitArr[unitCount] = &unit;
+			unitArr[unitCount]->attackable = false;
+			cout << "dropship load " << unitArr[unitCount]->name << endl;
 
 			printStatus();
+			this->slot -= unit.slotSize;
+			this->unitCount++;
 		}
 	};
 
@@ -267,6 +260,7 @@ public:
 			unitArr[i]->attackable = true;
 			i++;
 		}
+		delete unitArr;
 	};
 
 	void printStatus() {
@@ -303,6 +297,8 @@ int main() {
 	dropship.load(tank);
 	dropship.load(dragoon);
 
+	dragoon.attackable = false;
+
 	zealot.fight(dragoon);
 	marine.fight(dragoon);
 	tank.fight(dragoon);
@@ -312,6 +308,7 @@ int main() {
 	zealot.fight(dragoon);
 	marine.fight(dragoon);
 	tank.fight(dragoon);
+	dropship.fight(dragoon);
 
 	return 0;
 }
