@@ -260,7 +260,7 @@ public:
 			unitArr[i]->attackable = true;
 			i++;
 		}
-		delete unitArr;
+		delete[] unitArr;
 	};
 
 	void printStatus() {

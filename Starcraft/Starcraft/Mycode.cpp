@@ -278,7 +278,7 @@ public:
 			unitArr[i]->SetAttackable(true);
 			i++;
 		}
-		delete unitArr;
+		delete[] unitArr;
 	};
 private:
 	void printStatus() {
