@@ -299,7 +299,6 @@ int main() {
 	Zealot zealot;
 	Dragoon dragoon;
 	Dropship dropship;
-	Marine marine1;
 
 	int mineral = 1000;
 	int gas = 1000;
