@@ -15,9 +15,9 @@ public:
 	bool attackable;
 
 	string rush;
-	
+
 	void fight(Unit& unit) {
-		if (this->attackable == false) { 
+		if (this->attackable == false) {
 			cout << this->name << " can not attack" << endl;
 		}
 		else {
@@ -73,6 +73,25 @@ public:
 	}
 };
 
+class Protoss : virtual public Unit {
+public:
+	string init;
+
+	void buy(int& mineral, int& gas) {
+		if (mineral >= this->mineral) {
+			mineral -= this->mineral;
+			if (gas >= this->gas) {
+				gas -= this->gas;
+				cout << init << endl;
+			}
+			else
+				cout << "You require more Vespene gas." << endl;
+		}
+		else
+			cout << "You've not enough minerals." << endl;
+	}
+};
+
 class Marine : public smallUnit, public Terran {
 public:
 	Marine() {
@@ -88,7 +107,7 @@ public:
 	}
 };
 
-class Tank : public largeUnit {
+class Tank : public largeUnit, public Terran {
 public:
 	Tank() {
 		name = "tank";
@@ -99,31 +118,11 @@ public:
 		armour = 1;
 		attackable = true;
 		rush = "Move it!";
+		init = "Ready to roll out!";
 	}
-
-	void buy(int& mineral, int& gas) {
-		int flag = 0;
-
-		if (mineral >= this->mineral) {
-			mineral -= this->mineral;
-			flag++;
-		}
-		else
-			cout << "Not enough minerals." << endl;
-
-		if (gas >= this->gas) {
-			gas -= this->gas;
-			flag++;
-		}
-		else
-			cout << "Insufficient Vespene gas." << endl;
-
-		if (flag == 2)
-			cout << "Ready to roll out!" << endl;
-	};
 };
 
-class Zealot : public mediumUnit {
+class Zealot : public mediumUnit, public Protoss {
 public:
 	Zealot() {
 		name = "zealot";
@@ -134,30 +133,11 @@ public:
 		armour = 1;
 		attackable = true;
 		rush = "For Adun!";
+		init = "My life for Aiur";
 	}
-
-	void buy(int& mineral, int& gas) {
-		int flag = 0;
-		if (mineral >= this->mineral) {
-			mineral -= this->mineral;
-			flag++;
-		}
-		else
-			cout << "You've not enough minerals." << endl;
-
-		if (gas >= this->gas) {
-			gas -= this->gas;
-			flag++;
-		}
-		else
-			cout << "You require more Vespene gas." << endl;
-
-		if (flag == 2)
-			cout << "My life for Aiur" << endl;
-	};
 };
 
-class Dragoon : public largeUnit {
+class Dragoon : public largeUnit, public Protoss {
 public:
 	Dragoon() {
 		name = "dragoon";
@@ -168,30 +148,11 @@ public:
 		armour = 1;
 		attackable = true;
 		rush = "Confirmed.";
+		init = "I have returned!";
 	}
-
-	void buy(int& mineral, int& gas) {
-		int flag = 0;
-		if (mineral >= this->mineral) {
-			mineral -= this->mineral;
-			flag++;
-		}
-		else
-			cout << "You've not enough minerals." << endl;
-
-		if (gas >= this->gas) {
-			gas -= this->gas;
-			flag++;
-		}
-		else
-			cout << "You require more Vespene gas." << endl;
-
-		if (flag == 2)
-			cout << "I have returned!" << endl;
-	};
 };
 
-class Dropship : public largeUnit {
+class Dropship : public largeUnit, public Terran {
 private:
 	int slot = 8;
 	int unitCount = 0;
@@ -201,7 +162,7 @@ private:
 	1. Unit unitArr[8] : Unit 객체를 받을 수 있는 8칸 Array 선언. 그러나 Call by value라 외부 객체 참조 불가. 동적 할당 불가.
 	2. Unit* unitArr[8] : Unit 객체를 받을 수 있는 8칸 *Array 선언. 외부 객체 참조 가능. 그러나 동적 할당 불가.
 	3. Unit* unitArr = new Unit[8] : Unit 객체를 받을 수 있는 8칸 동적 Array 선언. 그러나 Call by value라 외부 객체 참조 불가.
-	4. Unit** unitArr = new Unit*[8] : *Unit 객체를 받을 수 있는 8칸 동적 **Array 선언. 
+	4. Unit** unitArr = new Unit*[8] : *Unit 객체를 받을 수 있는 8칸 동적 **Array 선언.
 	*/
 
 public:
@@ -212,31 +173,10 @@ public:
 		hp = 150;
 		armour = 1;
 		attackable = false;
+		init = "Can I take your order?";
 	}
-	
-	~Dropship() {
 
-	};
-
-	void buy(int& mineral, int& gas) {
-		int flag = 0;
-		if (mineral >= this->mineral) {
-			mineral -= this->mineral;
-			flag++;
-		}
-		else
-			cout << "Not enough minerals" << endl;
-
-		if (gas >= this->gas) {
-			gas -= this->gas;
-			flag++;
-		}
-		else
-			cout << "Insufficient Vespene gas" << endl;
-
-		if (flag == 2)
-			cout << "Can I take your order?" << endl;
-	};
+	~Dropship() {}
 
 	void load(Unit& unit) {
 		if (this->slot - unit.slotSize < 0) {
@@ -282,33 +222,14 @@ int main() {
 	Dragoon dragoon;
 	Dropship dropship;
 
-	int mineral = 1000;
-	int gas = 1000;
+	int mineral = 10;
+	int gas = 10;
 
 	marine.buy(mineral, gas);
 	tank.buy(mineral, gas);
 	zealot.buy(mineral, gas);
 	dragoon.buy(mineral, gas);
 	dropship.buy(mineral, gas);
-	cout << "------------------------------" << endl;
 
-	dropship.load(zealot);
-	dropship.load(marine);
-	dropship.load(tank);
-	dropship.load(dragoon);
-
-	dragoon.attackable = false;
-
-	zealot.fight(dragoon);
-	marine.fight(dragoon);
-	tank.fight(dragoon);
-
-	dropship.drop();
-
-	zealot.fight(dragoon);
-	marine.fight(dragoon);
-	tank.fight(dragoon);
-	dropship.fight(dragoon);
-	
 	return 0;
 }
