@@ -3,15 +3,29 @@
 
 using namespace std;
 
+class Terran {
+public:
+	string info = "Terran";
+	string minLack = "Not enough minerals.";
+	string gasLack = "Insufficient Vespene gas.";
+};
+
+class Protoss {
+public:
+	string info = "Protoss";
+	string minLack = "You've not enough minerals.";
+	string gasLack = "You require more Vespene gas.";
+};
+
 class Unit {
 protected:
-	string name, verse;
+	string name, init, rush;
 	int mineral, gas, hp, damage, armour, slotSize;
 	bool attackable, alive = true;
 
 private:
 	void getAttacked(Unit& unit) {
-		cout << unit.verse << endl;
+		cout << unit.rush << endl;
 		int realDamage = unit.damage - this->armour;
 		//공격력보다 방어력이 높은 경우 데미지 = 0
 		if (realDamage <= 0) realDamage = 0;
@@ -50,7 +64,8 @@ public:
 	}
 
 	string GetName() { return this->name; }
-	string GetVerse() { return this->verse; }
+	string GetInit() { return this->init; }
+	string GetRush() { return this->rush; }
 	int GetMIneral() { return this->mineral; }
 	int GetGas() { return this->gas; }
 	int GetHp() { return this->hp; }
@@ -61,7 +76,8 @@ public:
 	bool GetAlive() { return this->alive; }
 
 	void SetName(const string name) { this->name = name; }
-	void SetVerse(const string verse) { this->verse = verse; }
+	void SetInit(const string init) { this->init = init; }
+	void SetRush(const string rush) { this->rush = rush; }
 	void SetMIneral(int mineral) { this->mineral = mineral; }
 	void SetGas(int gas) { this->gas = gas; }
 	void SetHp(int hp) { this->hp = hp; }
@@ -72,15 +88,41 @@ public:
 	void SetAlive(bool alive) { this->alive = alive; }
 };
 
+
+template <typename T>
+class Building {
+private:
+	T t;
+public:
+	Building() {
+		cout << t.info << " building construction completed." << endl;
+	}
+	void Buy(Unit& unit, int& mineral, int& gas) {
+		if (mineral >= unit.GetMIneral()) {
+			mineral -= unit.GetMIneral();
+			if (gas >= unit.GetGas()) {
+				gas -= unit.GetGas();
+				cout << unit.GetInit() << endl;
+			}
+			else
+				cout << t.minLack << endl;
+		}
+		else
+			cout << t.gasLack << endl;
+	}
+};
+
 class smallUnit : public Unit { public: smallUnit() { slotSize = 1; } };
 class mediumUnit : public Unit { public: mediumUnit() { slotSize = 2; } };
 class largeUnit : public Unit { public: largeUnit() { slotSize = 4; } };
 
-class Marine : public smallUnit {
+class Marine : public smallUnit, private Terran {
 public:
 	Marine() {
 		name = "marine";
-		verse = "Go! Go! Go!";
+		init = "You wanna piece of me, boy?";
+		rush = "Go! Go! Go!";
+
 		mineral = 50;
 		gas = 0;
 		hp = 40;
@@ -88,33 +130,15 @@ public:
 		armour = 0;
 		attackable = true;
 	}
-
-	void Buy(int& mineral, int& gas) {
-		int flag = 0; // 유닛을 생성 가능한지 판별. flag 값이 2일 때만 생성 가능.
-		if (mineral >= this->mineral) {
-			mineral -= this->mineral;
-			flag++;
-		}
-		else
-			cout << "Not enough minerals." << endl;
-
-		if (gas >= this->gas) {
-			gas -= this->gas;
-			flag++;
-		}
-		else
-			cout << "Insufficient Vespene gas." << endl;
-
-		if (flag == 2)
-			cout << "You wanna piece of me, boy?" << endl;
-	};
 };
 
-class Tank : public largeUnit {
+class Tank : public largeUnit, private Terran {
 public:
 	Tank() {
 		name = "tank";
-		verse = "Move it!";
+		init = "Ready to roll out!";
+		rush = "Move it!";
+
 		mineral = 150;
 		gas = 50;
 		hp = 150;
@@ -122,34 +146,15 @@ public:
 		armour = 1;
 		attackable = true;
 	}
-
-	void Buy(int& mineral, int& gas) {
-		int flag = 0;
-
-		if (mineral >= this->mineral) {
-			mineral -= this->mineral;
-			flag++;
-		}
-		else
-			cout << "Not enough minerals." << endl;
-
-		if (gas >= this->gas) {
-			gas -= this->gas;
-			flag++;
-		}
-		else
-			cout << "Insufficient Vespene gas." << endl;
-
-		if (flag == 2)
-			cout << "Ready to roll out!" << endl;
-	};
 };
 
-class Zealot : public mediumUnit {
+class Zealot : public mediumUnit, private Protoss {
 public:
 	Zealot() {
 		name = "zealot";
-		verse = "For Adun!";
+		init = "My life for Aiur";
+		rush = "For Adun!";
+
 		mineral = 100;
 		gas = 0;
 		hp = 160;
@@ -157,33 +162,15 @@ public:
 		armour = 1;
 		attackable = true;
 	}
-
-	void Buy(int& mineral, int& gas) {
-		int flag = 0;
-		if (mineral >= this->mineral) {
-			mineral -= this->mineral;
-			flag++;
-		}
-		else
-			cout << "You've not enough minerals." << endl;
-
-		if (gas >= this->gas) {
-			gas -= this->gas;
-			flag++;
-		}
-		else
-			cout << "You require more Vespene gas." << endl;
-
-		if (flag == 2)
-			cout << "My life for Aiur" << endl;
-	};
 };
 
-class Dragoon : public largeUnit {
+class Dragoon : public largeUnit, private Protoss {
 public:
 	Dragoon() {
 		name = "dragoon";
-		verse = "Confirmed.";
+		init = "I have returned!";
+		rush = "Confirmed.";
+
 		mineral = 125;
 		gas = 50;
 		hp = 180;
@@ -191,29 +178,9 @@ public:
 		armour = 1;
 		attackable = true;
 	}
-
-	void Buy(int& mineral, int& gas) {
-		int flag = 0;
-		if (mineral >= this->mineral) {
-			mineral -= this->mineral;
-			flag++;
-		}
-		else
-			cout << "You've not enough minerals." << endl;
-
-		if (gas >= this->gas) {
-			gas -= this->gas;
-			flag++;
-		}
-		else
-			cout << "You require more Vespene gas." << endl;
-
-		if (flag == 2)
-			cout << "I have returned!" << endl;
-	};
 };
 
-class Dropship : public largeUnit {
+class Dropship : public largeUnit, private Terran {
 private:
 	int slot = 8;
 	int unitCount = 0;
@@ -229,32 +196,14 @@ private:
 public:
 	Dropship() {
 		name = "dropship";
+		init = "Can I take your order?";
+
 		mineral = 100;
 		gas = 100;
 		hp = 150;
 		armour = 1;
 		attackable = false;
 	}
-
-	void Buy(int& mineral, int& gas) {
-		int flag = 0;
-		if (mineral >= this->mineral) {
-			mineral -= this->mineral;
-			flag++;
-		}
-		else
-			cout << "Not enough minerals" << endl;
-
-		if (gas >= this->gas) {
-			gas -= this->gas;
-			flag++;
-		}
-		else
-			cout << "Insufficient Vespene gas" << endl;
-
-		if (flag == 2)
-			cout << "Can I take your order?" << endl;
-	};
 	
 	void Load(Unit& unit) {
 		if (this->slot - unit.GetSlotSize() < 0) {
@@ -300,14 +249,17 @@ int main() {
 	Dragoon dragoon;
 	Dropship dropship;
 
+	Building <Protoss> protoss_building;
+	Building <Terran> terran_building;
+
 	int mineral = 1000;
 	int gas = 1000;
 
-	marine.Buy(mineral, gas);
-	tank.Buy(mineral, gas);
-	zealot.Buy(mineral, gas);
-	dragoon.Buy(mineral, gas);
-	dropship.Buy(mineral, gas);
+	terran_building.Buy(marine, mineral, gas);
+	terran_building.Buy(tank, mineral, gas);
+	protoss_building.Buy(zealot, mineral, gas);
+	protoss_building.Buy(dragoon, mineral, gas);
+	protoss_building.Buy(dropship, mineral, gas);
 	cout << "------------------------------" << endl;
 
 	dropship.Load(zealot);
@@ -325,6 +277,6 @@ int main() {
 	marine.Fight(dragoon);
 	tank.Fight(dragoon);
 	dropship.Fight(dragoon);
-
+	
 	return 0;
 }
