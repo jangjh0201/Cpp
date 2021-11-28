@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Mycode.h";
+#include "Mycode.h"
 
 using namespace std;
 
